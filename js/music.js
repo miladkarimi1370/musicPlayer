@@ -100,8 +100,12 @@ let currentSeconds;
 let mySeekedBarInterval;
 let currentSong = allSongs.filter((item) => item.id === activeFlagOfplayer);
 let totalTimeOfCurrentMusic;
+let wrapperOfSeekedOffsetWidth;
 
-document.addEventListener("DOMContentLoaded", checkShowOrNotPlayer)
+document.addEventListener("DOMContentLoaded", checkShowOrNotPlayer);
+document.addEventListener("DOMContentLoaded", () => {
+    wrapperOfSeekedOffsetWidth = wrapperOfSeeked.offsetWidth;
+})
 function checkShowOrNotPlayer(show) {
     if (show) {
         secondPage.classList.add("hidden");
@@ -136,15 +140,34 @@ function checkShowOrNotPlayer(show) {
 
                     activeFlagOfplayer = Number(e.currentTarget.getAttribute("data-id"));
 
-                    myAudio.pause();
-                    myAudio.currentTime = 0;
-                    currentSeconds = 0;
-                    wrapperOfSeeked.children[0].style.width = "0px";
                     setSong(activeFlagOfplayer);
-                    setTimerOfSong();
 
-                    setWidthOfSeekedBar();
+                    myAudio.addEventListener("loadedmetadata", () => {
+                        totalTimeOfCurrentMusic = myAudio.duration;
+                    })
+
+                    //// start width of seeked bar
+                    let totalWidthOfSeekedBar = wrapperOfSeekedOffsetWidth;
+
+                    const relativeSeeked = Math.abs(totalWidthOfSeekedBar / totalTimeOfCurrentMusic);
+
+                    mySeekedBarInterval = setInterval(() => {
+                        let myWidth = wrapperOfSeeked.children[0].computedStyleMap().get("width").value;
+                        myWidth = myWidth + relativeSeeked;
+
+                   
+
+
+                        wrapperOfSeeked.children[0].style.width = (myWidth + "px");
+
+
+                    }, 1000);
+                    //// end width of seeked bar
+
+                    setTimerOfSong(activeFlagOfplayer);
+
                     myAudio.play();
+
 
 
 
@@ -173,7 +196,7 @@ playAudio.addEventListener("click", () => {
 
         myAudio.play();
         setTimerOfSong(activeFlagOfplayer)
-        setWidthOfSeekedBar(activeFlagOfplayer)
+        setWidthOfSeekedBar();
         playMusicFlag = true;
     }
 })
@@ -318,6 +341,9 @@ function setWidthOfSeekedBar() {
     mySeekedBarInterval = setInterval(() => {
         let myWidth = wrapperOfSeeked.children[0].computedStyleMap().get("width").value;
         myWidth = myWidth + relativeSeeked;
+
+
+
         wrapperOfSeeked.children[0].style.width = (myWidth + "px");
 
 
